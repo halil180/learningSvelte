@@ -1,38 +1,69 @@
 <script>
-  import svelteLogo from './assets/svelte.svg'
-  import Counter from './lib/Counter.svelte'
+  import Modal from './lib/Modal.svelte';
+  import AddPersonForm from './lib/AddPersonForm.svelte';
 
-$:fullname= `${firstName} ${lastName}` /// reactive value
+  let showModal = false;
 
-  let color = "black"
-  const handleClick = () => {
-    color = "orange"
+  let toggleModal = () => {
+    showModal = !showModal;
+  };
+
+	let people = [
+    { name: 'yoshi', beltColour: 'black', age: 25, id: 1 },
+    { name: 'mario', beltColour: 'orange', age: 45, id: 2 ,skills:["lol"]},
+    { name: 'luigi', beltColour: 'brown', age: 35, id: 3,skills:[] }
+  ];
+
+  const handleClick = (e, id) => {
+    people = people.filter(person => person.id != id);
+    console.log(e);
+  };
+
+  const addPerson = (e) => {
+   console.log(e.detail)
+   people = [...people,e.detail]
+   showModal = false
   }
-
-  $:{
-    console.log(firstName)
-    console.log(color)
-  }
-
-  // const handleInput = (e) => {
-  //   color = e.target.value
-  // }
-  let firstName = "jimi"
-  let lastName = "hendrix"
 </script>
 
+<Modal {showModal} on:click={toggleModal}>
+  <AddPersonForm on:addPerson={addPerson}/>
+</Modal>
 <main>
-  <h1 style="color: {color}">{color}</h1>
-  <p>{fullname}</p>
-<button on:click={handleClick}>update color</button>
+  <button on:click={toggleModal}>Open Modal</button>
+  {#each people as person (person.id)}
+    <div>
 
-<!-- <input type="text" on:input={handleInput}  value={color}> -->
-
-<input type="text" bind:value={color}> <!--shorthand for the input field above -->
-<input type="text" bind:value={firstName}>
-<input type="text" bind:value={lastName}>
+      {#if person.skills}
+      {#each person.skills as skill }
+      <ul>
+        <li> {skill} </li>
+      </ul>
+      {/each}
+      {/if}
+      <h4>{person.name}</h4>
+      {#if person.beltColour === 'black'}
+        <p><strong>MASTER NINJA</strong></p>
+      {/if}
+      <p>{person.age} years old, {person.beltColour} belt.</p>
+      <button on:click={(e) => handleClick(e, person.id)}>delete</button>
+    </div>
+  {:else}
+    <p>There are no people to show...</p>
+  {/each}
 </main>
 
-<style >
+<style>
+	main {
+		text-align: center;
+		padding: 1em;
+		max-width: 240px;
+		margin: 0 auto;
+	}
 
+	@media (min-width: 640px) {
+		main {
+			max-width: none;
+		}
+	}
 </style>
